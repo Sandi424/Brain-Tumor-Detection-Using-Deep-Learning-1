@@ -45,7 +45,7 @@ def download_model():
     
     # Check if the file was downloaded correctly
     if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 0:
-        st.success("Model downloaded successfully ✅")
+        st.success("")
     else:
         st.error("Model download failed. Please check your internet connection.")
 
@@ -53,7 +53,7 @@ def download_model():
 download_model()
 try:
     model = tf.keras.models.load_model(MODEL_PATH)
-    st.success("Model loaded successfully! 🚀")
+    st.success("")
 except Exception as e:
     st.error(f"Error loading model: {e}")
 
