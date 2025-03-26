@@ -5,21 +5,26 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
 import os
+import gdown
 
 # Google Drive Model Link
 MODEL_URL = "https://drive.google.com/uc?id=13di0px10kBfKqgdaI6B8aIFeoHsAmVhb"
 MODEL_PATH = "model.h5"
 
-# Download Model if not exists
-if not os.path.exists(MODEL_PATH):
-    with st.spinner("Downloading Model... Please wait ⏳"):
-        response = requests.get(MODEL_URL, stream=True)
-        with open(MODEL_PATH, "wb") as file:
-            for chunk in response.iter_content(chunk_size=1024):
-                file.write(chunk)
-    st.success("Model downloaded successfully! ✅")
+# Function to download model safely
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        st.warning("Downloading model... This may take a few minutes ⏳")
+        gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+    
+    # Check if the file was downloaded correctly
+    if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 0:
+        st.success("Model downloaded successfully ✅")
+    else:
+        st.error("Model download failed. Please check your internet connection.")
 
-# Load Model
+# Download and load model
+download_model()
 try:
     model = tf.keras.models.load_model(MODEL_PATH)
     st.success("Model loaded successfully! 🚀")
