@@ -1,17 +1,32 @@
 import streamlit as st
 import numpy as np
-from tensorflow.keras.models import load_model
+import tensorflow as tf
+import requests
+import os
 from tensorflow.keras.preprocessing.image import img_to_array
-import matplotlib.pyplot as plt
 from PIL import Image
 import base64
 
-# Wide mode
-st.set_page_config(page_title="Brain Tumor Detection")
+# Set Streamlit page config
+st.set_page_config(page_title="Brain Tumor Detection", layout="wide")
 
-# Load the trained model
-MODEL_PATH = "C:\\Users\\KIIT\\OneDrive\\Documents\\Desktop\\ML_Project\\Brain Tumor Prediction\\Brain-Tumor-Detection-Using-Deep-Learning-MRI-Images-Detection-Using-Computer-Vision-main\\model.h5"
-model = load_model(MODEL_PATH)
+# Google Drive Direct Download URL
+MODEL_URL = "https://drive.google.com/file/d/13di0px10kBfKqgdaI6B8aIFeoHsAmVhb/view?usp=sharing"
+MODEL_PATH = "model.h5"
+
+# Function to download model if not present
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        st.info("Downloading model...")
+        response = requests.get(MODEL_URL, stream=True)
+        with open(MODEL_PATH, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        st.success("Model downloaded successfully!")
+
+# Download and load model
+download_model()
+model = tf.keras.models.load_model(MODEL_PATH)
 
 # Class labels
 class_labels = ['pituitary', 'glioma', 'notumor', 'meningioma']
@@ -35,8 +50,8 @@ def set_background(image_path):
     """
     st.markdown(bg_image, unsafe_allow_html=True)
 
-# Set background image (Use a medical-related image)
-set_background("background.jpg")  # Replace with your medical-themed image
+# Set background image
+set_background("background.jpg")
 
 # Function to predict brain tumor
 def predict_tumor(image):
@@ -48,37 +63,20 @@ def predict_tumor(image):
     predicted_class_index = np.argmax(predictions, axis=1)[0]
     confidence_score = np.max(predictions, axis=1)[0]
     
-    if class_labels[predicted_class_index] == 'notumor':
-        result = "No Tumor"
-    else:
-        result = f"Tumor: {class_labels[predicted_class_index]}"
-    
+    result = "No Tumor" if class_labels[predicted_class_index] == 'notumor' else f"Tumor: {class_labels[predicted_class_index]}"
     return result, confidence_score
 
 # Streamlit UI
-st.markdown(
-    "<h1 style='text-align: center; color: white;'> Brain Tumor Detection</h1>",
-    unsafe_allow_html=True,
-)
-st.write(
-    "<p style='text-align: center; font-size: 18px; color: white;'>Upload an MRI scan to check for brain tumor presence.</p>",
-    unsafe_allow_html=True,
-)
+st.markdown("<h1 style='text-align: center; color: white;'> Brain Tumor Detection</h1>", unsafe_allow_html=True)
+st.write("<p style='text-align: center; font-size: 18px; color: white;'>Upload an MRI scan to check for brain tumor presence.</p>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Choose an MRI image...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    
     st.image(image, caption="Uploaded MRI Image", use_column_width=True)
     
     prediction, confidence = predict_tumor(image)
     
-    st.markdown(
-        f"<h3 style='color: white;'>Prediction: {prediction}</h3>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f"<h4 style='color: white;'>Confidence: {confidence * 100:.2f}%</h4>",
-        unsafe_allow_html=True,
-    )
+    st.markdown(f"<h3 style='color: white;'>Prediction: {prediction}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='color: white;'>Confidence: {confidence * 100:.2f}%</h4>", unsafe_allow_html=True)
