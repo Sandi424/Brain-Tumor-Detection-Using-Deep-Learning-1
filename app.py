@@ -78,7 +78,7 @@ def predict_tumor(image):
     return result, confidence_score
 
 # Streamlit UI
-st.markdown("<h1 style='text-align: center; color: white;'>Brain Tumor Detection 🧠</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>Brain Tumor Detection</h1>", unsafe_allow_html=True)
 st.write("<p style='text-align: center; font-size: 18px; color: white;'>Upload an MRI scan to check for brain tumor presence.</p>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Choose an MRI image...", type=["jpg", "png", "jpeg"])
